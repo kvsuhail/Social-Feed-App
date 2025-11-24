@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { HashRouter } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Feed from './components/Feed';
+import Profile from './components/Profile';
+import Search from './components/Search';
+import Notifications from './components/Notifications';
 import CreatePostModal from './components/CreatePostModal';
-import { SocialProvider } from './context/SocialContext';
+import { SocialProvider, useSocial } from './context/SocialContext';
 
 const AppContent: React.FC = () => {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+  const { currentUser } = useSocial();
 
   return (
     <div className="min-h-screen bg-dark-900 text-slate-100 font-sans">
@@ -16,17 +20,23 @@ const AppContent: React.FC = () => {
 
         {/* Main Content Area */}
         <main className="w-full md:pl-64 lg:max-w-4xl min-h-screen">
-          <Feed />
+          <Routes>
+            <Route path="/" element={<Feed />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/explore" element={<Search />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
         </main>
 
         {/* Right Sidebar (Suggestions) - Desktop Only */}
         <div className="hidden lg:block w-80 fixed right-0 top-0 h-screen p-8 border-l border-dark-800 z-30">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
-              <img src="https://picsum.photos/seed/me/150/150" alt="me" className="w-12 h-12 rounded-full" />
+              <img src={currentUser.avatarUrl} alt="me" className="w-12 h-12 rounded-full" />
               <div className="flex flex-col">
-                <span className="font-semibold text-sm">arivera_dev</span>
-                <span className="text-xs text-gray-400">Alex Rivera</span>
+                <span className="font-semibold text-sm">{currentUser.handle.replace('@', '')}</span>
+                <span className="text-xs text-gray-400">{currentUser.name}</span>
               </div>
             </div>
             <button className="text-primary-500 text-xs font-bold">Switch</button>

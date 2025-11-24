@@ -51,7 +51,8 @@ export const generateFeedContent = async (count: number = 5): Promise<Post[]> =>
         handle: item.handle,
         avatarUrl: `https://picsum.photos/seed/${item.handle}/150/150`,
         label: item.label as UserLabel,
-        followers: Math.floor(Math.random() * 10000)
+        followers: Math.floor(Math.random() * 10000),
+        following: Math.floor(Math.random() * 1000)
       };
 
       return {
@@ -59,11 +60,13 @@ export const generateFeedContent = async (count: number = 5): Promise<Post[]> =>
         userId: user.id,
         user: user,
         imageUrl: `https://picsum.photos/seed/${imageSeed}/800/800`, // High res post image
+        mediaType: 'image', // Default generated content is image
         caption: item.caption,
         likes: item.likes,
         comments: [],
         timestamp: new Date(),
-        isLikedByCurrentUser: false
+        isLikedByCurrentUser: false,
+        isSaved: false
       };
     });
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { X, Image as ImageIcon, Loader2, Video } from 'lucide-react';
 import { useSocial } from '../context/SocialContext';
 
 interface CreatePostModalProps {
@@ -11,9 +11,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
   const [caption, setCaption] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { createPost } = useSocial();
+  const { createPost, currentUser } = useSocial();
 
   if (!isOpen) return null;
 
@@ -22,6 +23,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
       const file = e.target.files[0];
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setMediaType(file.type.startsWith('video') ? 'video' : 'image');
     }
   };
 
@@ -43,7 +45,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-dark-900 border border-dark-700 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+      <div className="bg-dark-900 border border-dark-700 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-dark-800">
           <button onClick={onClose} className="text-gray-400 hover:text-white">
@@ -63,14 +65,18 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
         <div className="p-4 flex flex-col space-y-4">
           <div className="flex items-center justify-center w-full">
             {previewUrl ? (
-              <div className="relative w-full aspect-square rounded-lg overflow-hidden group">
-                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+              <div className="relative w-full aspect-square bg-dark-800 rounded-lg overflow-hidden group flex items-center justify-center">
+                {mediaType === 'image' ? (
+                  <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <video src={previewUrl} className="w-full h-full object-contain" controls />
+                )}
                 <button 
                   onClick={() => {
                     setSelectedFile(null);
                     setPreviewUrl(null);
                   }}
-                  className="absolute top-2 right-2 bg-black/50 p-1 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 bg-black/50 p-1 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 >
                   <X size={16} />
                 </button>
@@ -80,21 +86,24 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full aspect-video border-2 border-dashed border-dark-700 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-dark-800 hover:border-dark-600 transition-all"
               >
-                <ImageIcon size={48} className="mb-2" />
-                <span className="text-sm">Select photo from device</span>
+                <div className="flex space-x-2 mb-2">
+                    <ImageIcon size={32} />
+                    <Video size={32} />
+                </div>
+                <span className="text-sm">Select photo or video</span>
               </button>
             )}
             <input 
               type="file" 
               ref={fileInputRef} 
               onChange={handleFileChange} 
-              accept="image/*" 
+              accept="image/*, video/*" 
               className="hidden" 
             />
           </div>
 
           <div className="flex space-x-3">
-             <img src="https://picsum.photos/seed/me/150/150" className="w-8 h-8 rounded-full" alt="Me" />
+             <img src={currentUser.avatarUrl} className="w-8 h-8 rounded-full" alt="Me" />
              <textarea 
                value={caption}
                onChange={(e) => setCaption(e.target.value)}

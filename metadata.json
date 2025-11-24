@@ -1,0 +1,8 @@
+{
+  "name": "social feed app",
+  "description": "this is a social portfolio by suhail kv\n@kvsuhail\n",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
